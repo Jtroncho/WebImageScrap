@@ -9,11 +9,10 @@ parser.add_argument("website", help="Websites separated by commas to extract ima
 parser.add_argument("-o", "--output", help="Path to store images.", default="imgs")
 args = parser.parse_args()
 
-if args.output:
-	try:
-		os.stat(args.output)
-	except:
-		os.mkdir(args.output)
+try:
+	os.stat(args.output)
+except:
+	os.mkdir(args.output)
 
 try:
 	#options for a Headless Firefox
