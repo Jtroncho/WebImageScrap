@@ -2,7 +2,7 @@
 Get all images from a website
 
 # Using:
-argparse, urllib.request, sys, os, time, selenium, selenium.webdriver.common.keys.
+argparse, urllib.request, sys, os, time, selenium.
 
 https://github.com/mozilla/geckodriver/releases
 
