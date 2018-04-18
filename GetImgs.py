@@ -3,7 +3,6 @@ import urllib.request
 import sys, os, time as t
 
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 
 parser = argparse.ArgumentParser(description="Get all the Images of a webpage.")
 parser.add_argument("website", help="Websites separated by commas to extract images from, like: https://www.python.org/ or https://www.python.org/,https://docs.python.org/3/")
