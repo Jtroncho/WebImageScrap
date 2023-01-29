@@ -2,8 +2,10 @@
 Get all images from a website
 
 # Using:
-argparse, urllib.request, sys, os, time, selenium.
+argparse, requests, urllib.request, sys, os, time
+"GetImages.py" - beautifulsoup4
+"GetImagesSelenium.py" - selenium ['https://github.com/mozilla/geckodriver/releases']
 
-https://github.com/mozilla/geckodriver/releases
-
-Firefox
+## Using pyvenvex (Python Venv)
+pyvenvex.py . --verbose
+pip install -r requirements.txt
