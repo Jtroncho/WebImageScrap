@@ -11,16 +11,6 @@ import time as t
 from os import listdir
 from os.path import isfile, join
 
-"""
-page = requests.get("https://forecast.weather.gov/MapClick.php?lat=37.7772&lon=-122.4168")
-soup = BeautifulSoup(page.content, 'html.parser')
-seven_day = soup.find(id="seven-day-forecast")
-forecast_items = seven_day.find_all(class_="tombstone-container")
-tonight = forecast_items[0]
-print(tonight.prettify())
-"""
-
-
 def parseArguments():
     parser = argparse.ArgumentParser(
         description="Get all the Images from website.")
@@ -71,8 +61,7 @@ def createDir():
         args.output += "/"
 
 def getDomain(website):
-    domain = urlparse(website).netloc
-    return domain
+    return urlparse(website).netloc
 
 def scrapHrefs(page):
     hrefs = []
@@ -80,7 +69,6 @@ def scrapHrefs(page):
         hrefs.append(link.get('href'))
     hrefs = list(set(hrefs))
     return hrefs
-
 
 def scrapImgs(page):
     imgs = []
@@ -94,22 +82,43 @@ def saveImage(imageLink):
     with open(args.output + os.path.basename(urlparse(imageLink).path), 'wb') as file:
         file.write(response.content)
 
+def saveVisitedWebsites(websites):
+    saveLineOnFile("Visited Websites:")
+    with open(args.output + "visited.txt", 'a') as file:
+        file.write(str("\n"))
+        file.write("".join(str(item) for item in websites))
+
+def saveLineOnFile(text):
+    with open(args.output + "visited.txt", 'a') as file:
+        file.write(str("\n"))
+        file.write(str(text))
+
 def downloadImages(images):
+    saveLineOnFile("Images:")
     for link in images:
         saveImage(link)
+        saveLineOnFile(link)
 
 def getImgsAndHrefs(website):
     print("website: ", website)
-    domain = getDomain(website)
+    saveLineOnFile("Website:")
+    saveLineOnFile(website)
+    domain = "http://" + getDomain(website)
 
     page = BeautifulSoup(requests.get(website).content, 'html.parser')
 
     imgs = scrapImgs(page)
+    imgs = [x for x in imgs if (os.path.basename(urlparse(x).path) not in downloadedImages)]
     hrefs = scrapHrefs(page)
+    for x in hrefs:
+        if(x == None or len(x)<2):
+            hrefs.remove(x)
+        elif (args.domain and x[0] != "/"):
+            hrefs.remove(x)
     hrefs = [domain+x for x in hrefs]
 
-    print("Images found", len(imgs))
-    print("Links found", len(hrefs))
+
+    print("Images found", len(imgs),"|","Links found", len(hrefs))
     
     return imgs, hrefs
 
@@ -117,11 +126,13 @@ def getDataInDepth(depthWebsites):
     websitesToVisit = []
     for website in depthWebsites:
         imgs, hrefs = getImgsAndHrefs(website)
+        if (args.verbose):
+            print("imgs ", imgs)
+            print("hrefs ", hrefs)
         downloadImages(imgs)
         newHrefs = [x for x in hrefs if x not in websitesToVisit]
-        websitesToVisit.append(newHrefs)
+        websitesToVisit.extend(newHrefs)
     return websitesToVisit
-
 
 def main():
     parseArguments()
@@ -133,9 +144,10 @@ def main():
     depth.append(websites)
 
     for depthIteration, depthWebsites in enumerate(depth, start=1):
-        depth.append(getDataInDepth(depthWebsites))
         if (args.verbose):
             print("Actual depth: ", depthIteration, "|| depth: ", depth)
+        depth.append(getDataInDepth(depthWebsites))
+        saveVisitedWebsites(depthWebsites)
         if (depthIteration >= args.depth):
             break
 
